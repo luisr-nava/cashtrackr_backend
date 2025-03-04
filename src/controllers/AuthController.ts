@@ -221,4 +221,26 @@ export class AuthController {
 
     res.json("Password Correcto");
   };
+  static updateUser = async (req: Request, res: Response) => {
+    const { name, email } = req.body;
+
+    try {
+      const existingUser = await User.findOne({ where: { email } });
+
+      if (existingUser && existingUser.id !== req.user.id) {
+        const error = new Error(
+          "Ese email ya esta registrado por otro usuario",
+        );
+
+        res.status(409).json({ error: error.message });
+
+        return;
+      }
+      await User.update({ name, email }, { where: { id: req.user.id } });
+
+      res.json("Perfil actualizado correctamente");
+    } catch (error) {
+      res.status(500).json({ error: "Hubo un error" });
+    }
+  };
 }
